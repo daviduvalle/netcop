@@ -48,6 +48,8 @@ public class HTTPPinger {
                     stopWatch.stop();
                     avg += stopWatch.elapsed(TimeUnit.MILLISECONDS);
                     successfulPings++;
+                } else {
+                    avg += 0;
                 }
                 
             } catch (IOException e) {
@@ -55,8 +57,10 @@ public class HTTPPinger {
                 stopWatch.stop();
             }
         }
-        
-        avg = avg / successfulPings;
+
+        if (successfulPings != 0) {
+            avg = avg / successfulPings;
+        }
         
         return avg;
     }

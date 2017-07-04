@@ -14,7 +14,7 @@ public class TestEndpoint {
         HashMap<String, String> testEndpoints = new HashMap<String, String>();
         testEndpoints.put("google", "http://www.google.com");
         //testEndpoints.put("netflix", "http://www.netflix.com");
-        testEndpoints.put("amazon", "http://www.amazon.com");
+        // testEndpoints.put("amazon", "http://www.amazon.com");
         //testEndpoints.put("facebook", "http://www.facebook.com");
         
         ENDPOINTS = Collections.unmodifiableMap(testEndpoints);

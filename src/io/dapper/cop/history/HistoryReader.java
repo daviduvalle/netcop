@@ -26,13 +26,22 @@ public class HistoryReader {
         if (!storageFile.toFile().exists()) {
             throw new IOException("Storage file doesn't exists");
         }
-        
+
+        // Reads a file containing different samples stored as separate
+        // JSON objects
         String content = new String(Files.readAllBytes(storageFile));
+
+        String[] tests = content.split("\\{\"date");
+
+        for (String test : tests) {
+            System.out.println("What you got? "+ test);
+        }
+
+        //Gson gson = new Gson();
+        //Type listType = new TypeToken<ArrayList<TestInstance>>(){}.getType();
+        //List<TestInstance> testInstances = gson.fromJson(content, listType);
         
-        Gson gson = new Gson();
-        Type listType = new TypeToken<ArrayList<TestInstance>>(){}.getType();
-        List<TestInstance> testInstances = gson.fromJson(content, listType);
-        
-        return testInstances;
+        //return testInstances;
+        return null;
     }
 }
