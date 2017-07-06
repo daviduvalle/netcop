@@ -4,11 +4,13 @@ import io.dapper.cop.models.TestInstance;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.lang.reflect.Type;
+import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -31,17 +33,13 @@ public class HistoryReader {
         // JSON objects
         String content = new String(Files.readAllBytes(storageFile));
 
-        String[] tests = content.split("\\{\"date");
+        String[] tests = content.split("\n");
 
-        for (String test : tests) {
-            System.out.println("What you got? "+ test);
-        }
+        Gson gson = new Gson();
 
-        //Gson gson = new Gson();
-        //Type listType = new TypeToken<ArrayList<TestInstance>>(){}.getType();
-        //List<TestInstance> testInstances = gson.fromJson(content, listType);
-        
-        //return testInstances;
-        return null;
+        List<TestInstance> output = Arrays.stream(tests).map(t ->
+            gson.fromJson(t, TestInstance.class)).collect(Collectors.toList());
+
+        return output;
     }
 }

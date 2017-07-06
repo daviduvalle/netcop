@@ -17,7 +17,9 @@ public class CopStats {
     public void printStats() {
         try {
             List<TestInstance> testInstances = historyReader.read();
-            System.out.println(testInstances.size());
+            // Iterate over the instances
+            // Create a hashmap where key is the website and value
+            // a list of time/avg response sorted by time
         } catch (IOException e) {
             e.printStackTrace();
         }

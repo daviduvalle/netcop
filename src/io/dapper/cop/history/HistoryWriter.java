@@ -53,6 +53,7 @@ public class HistoryWriter {
                 Files.newBufferedWriter(Paths.get("/tmp/", "netcop.json"),
                         StandardOpenOption.APPEND)) {
             writer.write(jsonOutput);
+            writer.write("\n");
             System.out.println("Writing record: "+jsonOutput);
         } catch (Exception e) {
             e.printStackTrace();
