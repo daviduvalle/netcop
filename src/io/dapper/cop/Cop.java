@@ -19,7 +19,6 @@ public class Cop {
         options.addOption("stats", "show text based stats");
         options.addOption("graph", "generates a graph of the stats");
         options.addOption("config", "prints version and configuration");
-        options.addOption("run", "runs and collect data");
         
         CommandLineParser parser = new DefaultParser();
         CommandLine line = null;
@@ -30,8 +29,8 @@ public class Cop {
             System.out.println("Error while parsing arguments");
             e.printStackTrace();
         }
-        
-        if (line.hasOption("run")) {
+
+        if (line.getOptions().length == 0) {
             CopRunner copRunner = new CopRunner();
             copRunner.run();
         }
@@ -43,7 +42,7 @@ public class Cop {
             copStats.printStats();
         } else if (line.hasOption("graph")) {
             // TODO: generate a nice chart
-        } else if (line.getArgList().size() == 0 || line.hasOption("help")) {
+        } else if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("netcop", options);
         }

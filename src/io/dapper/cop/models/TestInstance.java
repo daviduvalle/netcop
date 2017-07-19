@@ -14,6 +14,10 @@ public class TestInstance {
         this.testRecords = new ArrayList<TestRecord>();
     }
 
+    public List<TestRecord> getTestRecords() {
+        return this.testRecords;
+    }
+
     public void addTestRecord(TestRecord testRecord) {
         this.testRecords.add(testRecord);
     }
