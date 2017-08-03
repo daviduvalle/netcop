@@ -10,6 +10,9 @@ import org.apache.commons.cli.ParseException;
 import io.dapper.cop.configuration.CopConfigurationFormatter;
 import io.dapper.cop.stats.CopStats;
 
+/**
+ * Cop CLI
+ */
 public class Cop {
     
     public static void main(String[] args) throws InterruptedException {
