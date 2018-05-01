@@ -41,15 +41,18 @@ public class CopStats {
 
         Map<String, List<LatencyInstance>> reportData = this.loadData(testInstances);
 
-        for (String website : reportData.keySet()) {
-            System.out.println("Website: "+website);
-            System.out.println("Total number of requests: "+reportData.get
-                    (website).size() * CopConfiguration.PING_COUNT);
-            System.out.println("Averages saved: "+reportData.get(website).size());
-            for (LatencyInstance latencyInstance : reportData.get(website)) {
-                System.out.println(
-                        "\t"+latencyInstance.getTime()+"\tavg: "+latencyInstance.getAverageTimeinMilli());
+        for (String endpoint : reportData.keySet()) {
+            System.out.println("Endpoint: "+endpoint);
+            System.out.println("# of data points loaded: "+reportData.get(endpoint).size());
+
+            for (LatencyInstance latencyInstance : reportData.get(endpoint))
+            {
+                String output = String.format("Timestamp %s, ping time: %s",
+                        latencyInstance
+                        .timestamp, latencyInstance.pingTime);
+                System.out.println(output);
             }
+
             System.out.println();
         }
 
@@ -69,10 +72,11 @@ public class CopStats {
                 if (endpointToLatencyInstance.containsKey(testRecord.getWebsiteName())) {
                     endpointToLatencyInstance.get(
                             testRecord.getWebsiteName()).add(
-                            new LatencyInstance(testInstance.getInstanceDate(), testRecord.getAvgTime()));
+                            new LatencyInstance(testInstance.getInstanceDate
+                                    (), testRecord.getTime()));
                 } else {
                     ArrayList<LatencyInstance> latencyInstances = new ArrayList<>();
-                    latencyInstances.add(new LatencyInstance(testInstance.getInstanceDate(), testRecord.getAvgTime()));
+                    latencyInstances.add(new LatencyInstance(testInstance.getInstanceDate(), testRecord.getTime()));
                     endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
                 }
             }
@@ -82,20 +86,20 @@ public class CopStats {
     }
 
     private static class LatencyInstance {
-        private final String time;
-        private final String averageTimeinMilli;
+        private final String timestamp;
+        private final String pingTime;
 
-        public LatencyInstance(String time, String averageTimeinMilli) {
-            this.time = time;
-            this.averageTimeinMilli = averageTimeinMilli;
+        public LatencyInstance(String timestamp, String pingTime) {
+            this.timestamp = timestamp;
+            this.pingTime = pingTime;
         }
 
-        public String getTime() {
-            return this.time;
+        public String getTimestamp() {
+            return this.timestamp;
         }
 
-        public String getAverageTimeinMilli() {
-            return this.averageTimeinMilli;
+        public String getPingTime() {
+            return this.pingTime;
         }
     }
 

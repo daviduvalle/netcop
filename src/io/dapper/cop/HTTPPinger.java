@@ -1,6 +1,5 @@
 package io.dapper.cop;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
@@ -12,56 +11,46 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.common.base.Stopwatch;
 
+/**
+ * Simple http client that connects to a http server
+ * and reports back the time spent during connection
+ */
 public class HTTPPinger {
 
-    private int pingCount;
-    private String websiteURL;
-    
-    public HTTPPinger(int pingCount) {
-        this.pingCount = pingCount;
+    // Same timeout used for connect and connection request
+    // change them if needed.
+    private final static int TIMEOUT = 2000;
+    private final static RequestConfig requestConfig;
+    private static RequestConfig.Builder requestBuilder = RequestConfig
+            .custom();
+    static {
+        requestBuilder = requestBuilder.setConnectTimeout(TIMEOUT)
+                .setConnectionRequestTimeout(TIMEOUT).setCookieSpec(CookieSpecs
+                        .STANDARD);
+        requestConfig = requestBuilder.build();
     }
-    
-    public void setTarget(String websiteURL) {
-        this.websiteURL = websiteURL;
-    }
-    
-    public double ping() {
-        
-        double avg = 0;
-        int successfulPings = 0;
-        
-        for (int i = 0; i < this.pingCount; i++) {
-            
-            RequestConfig.Builder requestBuilder = RequestConfig.custom();
-            requestBuilder = requestBuilder.setConnectTimeout(2000);
-            requestBuilder = requestBuilder.setConnectionRequestTimeout(2000);
-            requestBuilder = requestBuilder.setCookieSpec(CookieSpecs.STANDARD);
-            
-            HttpClient client = HttpClientBuilder.create().
-                    setDefaultRequestConfig(requestBuilder.build()).build();
-            HttpGet request = new HttpGet(this.websiteURL);
-            Stopwatch stopWatch = Stopwatch.createStarted();
-            try {
-                HttpResponse response = client.execute(request);
-                
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    stopWatch.stop();
-                    avg += stopWatch.elapsed(TimeUnit.MILLISECONDS);
-                    successfulPings++;
-                } else {
-                    avg += 0;
-                }
-                
-            } catch (IOException e) {
-                e.printStackTrace();
+
+    /**
+     * Returns the time spent during ping
+     * @return ping time
+     */
+    public long ping(String endpoint) {
+
+        HttpClient client = HttpClientBuilder.create().
+                setDefaultRequestConfig(requestConfig).build();
+        HttpGet request = new HttpGet(endpoint);
+        Stopwatch stopWatch = Stopwatch.createStarted();
+        try {
+            HttpResponse response = client.execute(request);
+
+            if (response.getStatusLine().getStatusCode() == 200) {
                 stopWatch.stop();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            stopWatch.stop();
         }
 
-        if (successfulPings != 0) {
-            avg = avg / successfulPings;
-        }
-        
-        return avg;
+        return stopWatch.elapsed(TimeUnit.MILLISECONDS);
     }
 }

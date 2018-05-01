@@ -20,7 +20,6 @@ public class Cop {
         Options options = new Options();
         options.addOption("help", "prints this help");
         options.addOption("stats", "show text based stats");
-        options.addOption("graph", "generates a graph of the stats");
         options.addOption("config", "prints version and configuration");
         
         CommandLineParser parser = new DefaultParser();
@@ -43,8 +42,6 @@ public class Cop {
         else if (line.hasOption("stats")) {
             CopStats copStats = new CopStats();
             copStats.printStats();
-        } else if (line.hasOption("graph")) {
-            // TODO: generate a nice chart
         } else if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("netcop", options);

@@ -2,11 +2,11 @@ package io.dapper.cop.models;
 
 public class TestRecord {
     private String websiteName;
-    private String avgTime;
+    private String time;
     
-    public TestRecord(String websiteName, String avgTime) {
+    public TestRecord(String websiteName, String time) {
         this.websiteName = websiteName;
-        this.avgTime = avgTime;
+        this.time = time;
     }
     
     public void setWebsiteName(String websiteName) {
@@ -17,16 +17,16 @@ public class TestRecord {
         return this.websiteName;
     }
     
-    public void setAvgTime(String avgTime) {
-        this.avgTime = avgTime;
+    public void setTime(String time) {
+        this.time = time;
     }
     
-    public String getAvgTime() {
-        return this.avgTime;
+    public String getTime() {
+        return this.time;
     }
     
     @Override
     public String toString() {
-        return this.websiteName + " avg. time " + this.avgTime;
+        return this.websiteName + "  ping time " + this.time;
     }
 }
