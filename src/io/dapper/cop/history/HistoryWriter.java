@@ -8,6 +8,7 @@ import java.nio.file.StandardOpenOption;
 
 import com.google.gson.Gson;
 
+import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.models.TestInstance;
 import io.dapper.cop.models.TestRecord;
 
@@ -39,7 +40,8 @@ public class HistoryWriter {
         Gson gson = new Gson();
         String jsonOutput = gson.toJson(this.testInstance);
         
-        Path storageFile = Paths.get("/tmp/", "netcop.json");
+        Path storageFile = Paths.get(CopConfiguration.TMP_DIR,
+                CopConfiguration.STORAGE_FILE);
         
         if (!storageFile.toFile().exists()) {
             try { 
@@ -50,7 +52,7 @@ public class HistoryWriter {
         }
 
         try (BufferedWriter writer = 
-                Files.newBufferedWriter(Paths.get("/tmp/", "netcop.json"),
+                Files.newBufferedWriter(storageFile,
                         StandardOpenOption.APPEND)) {
             writer.write(jsonOutput);
             writer.write("\n");

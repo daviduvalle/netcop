@@ -1,5 +1,6 @@
 package io.dapper.cop;
 
+import io.dapper.cop.configuration.CopConfiguration;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -9,6 +10,8 @@ import org.apache.commons.cli.ParseException;
 
 import io.dapper.cop.configuration.CopConfigurationFormatter;
 import io.dapper.cop.stats.CopStats;
+
+import java.io.File;
 
 /**
  * Cop CLI
@@ -34,6 +37,10 @@ public class Cop {
 
         if (line.getOptions().length == 0) {
             CopRunner copRunner = new CopRunner();
+            System.out.println("Netcop "+ CopConfiguration.COP_VERSION);
+            System.out.println(String.format("Storing data in %s/%s",
+                    CopConfiguration.TMP_DIR,
+                    CopConfiguration.STORAGE_FILE));
             copRunner.run();
         }
         else if (line.hasOption("config")) {

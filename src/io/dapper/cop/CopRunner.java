@@ -6,7 +6,9 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.history.HistoryWriter;
 import io.dapper.cop.models.TestRecord;
 
@@ -29,6 +31,7 @@ public class CopRunner {
             }
         });
         DecimalFormat df = new DecimalFormat("#.00");
+        final AtomicInteger runCount = new AtomicInteger(1);
 
         Runnable task = () -> {
             HistoryWriter historyWriter = new HistoryWriter();
@@ -52,6 +55,13 @@ public class CopRunner {
 
             results.stream().forEach(r -> historyWriter.addRecord(r));
             historyWriter.write();
+
+            // Stop running after the max count is reached
+            if (runCount.intValue() == CopConfiguration.MAX_RUN_COUNT) {
+                executor.shutdown();
+            }
+
+            runCount.incrementAndGet();
         };
         
         executor.scheduleAtFixedRate(task, 0,
