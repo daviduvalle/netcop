@@ -43,15 +43,30 @@ public class CopStats {
 
         for (String endpoint : reportData.keySet()) {
             System.out.println("Endpoint: "+endpoint);
-            System.out.println("# of data points loaded: "+reportData.get(endpoint).size());
+            List<LatencyInstance> latencies = reportData.get(endpoint);
+            System.out.println("# of data points loaded: "+latencies.size());
+            double average = 0;
 
-            for (LatencyInstance latencyInstance : reportData.get(endpoint))
-            {
-                String output = String.format("Timestamp %s, ping time: %s",
-                        latencyInstance
-                        .timestamp, latencyInstance.pingTime);
-                System.out.println(output);
+            // Compute average
+            for (LatencyInstance latencyInstance : latencies) {
+                average += Double.valueOf(latencyInstance.pingTime);
             }
+
+            average = average / latencies.size();
+
+            // Compute std. deviation
+            float numerator = 0;
+            float denominator = latencies.size() - 1;
+            for (LatencyInstance latencyInstance : latencies) {
+                numerator += Math.pow(Float.valueOf(latencyInstance.pingTime)
+                                - average, 2);
+            }
+
+            float tmpValue = numerator / denominator;
+            double deviation = Math.sqrt(tmpValue);
+
+            System.out.println("\tavg: "+average);
+            System.out.println("\tstd. deviation: "+deviation);
 
             System.out.println();
         }
@@ -92,14 +107,6 @@ public class CopStats {
         public LatencyInstance(String timestamp, String pingTime) {
             this.timestamp = timestamp;
             this.pingTime = pingTime;
-        }
-
-        public String getTimestamp() {
-            return this.timestamp;
-        }
-
-        public String getPingTime() {
-            return this.pingTime;
         }
     }
 

@@ -1,5 +1,6 @@
 package io.dapper.cop.history;
 
+import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.models.TestInstance;
 
 import java.io.IOException;
@@ -23,7 +24,8 @@ public class HistoryReader {
 
     public List<TestInstance> read() throws IOException {
         
-        Path storageFile = Paths.get("/tmp/", "netcop.json");
+        Path storageFile = Paths.get(CopConfiguration.TMP_DIR,
+                CopConfiguration.STORAGE_FILE);
         
         if (!storageFile.toFile().exists()) {
             throw new IOException("Storage file doesn't exists");
