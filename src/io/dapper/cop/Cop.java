@@ -38,17 +38,14 @@ public class Cop {
         if (line.getOptions().length == 0) {
             CopRunner copRunner = new CopRunner();
             System.out.println("Netcop "+ CopConfiguration.COP_VERSION);
-            System.out.println(String.format("Storing data in %s/%s",
-                    CopConfiguration.TMP_DIR,
-                    CopConfiguration.STORAGE_FILE));
             copRunner.run();
         }
         else if (line.hasOption("config")) {
             CopConfigurationFormatter.printConfiguration();
         }
         else if (line.hasOption("stats")) {
-            CopStats copStats = new CopStats();
-            copStats.printStats();
+            //CopStats copStats = new CopStats();
+            //copStats.printStats();
         } else if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("netcop", options);

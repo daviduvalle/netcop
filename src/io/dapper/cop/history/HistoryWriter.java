@@ -1,6 +1,9 @@
 package io.dapper.cop.history;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,8 +21,20 @@ import io.dapper.cop.models.TestRecord;
 public class HistoryWriter {
 
     private TestInstance testInstance;
+    private File tmpFile;
 
     public HistoryWriter() {
+
+        try {
+            tmpFile = File.createTempFile("netcop", null);
+            System.out.println("Writing data to: " + tmpFile
+                    .getAbsolutePath().toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createTestInstance() {
         this.testInstance = new TestInstance();
     }
 
@@ -36,24 +51,12 @@ public class HistoryWriter {
      * Actually writes the data into the default storage
      * location.
      */
-    public void write() {
+    public File write() {
         Gson gson = new Gson();
         String jsonOutput = gson.toJson(this.testInstance);
-        
-        Path storageFile = Paths.get(CopConfiguration.TMP_DIR,
-                CopConfiguration.STORAGE_FILE);
-        
-        if (!storageFile.toFile().exists()) {
-            try { 
-                storageFile.toFile().createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
-        try (BufferedWriter writer = 
-                Files.newBufferedWriter(storageFile,
-                        StandardOpenOption.APPEND)) {
+        try (FileWriter writer =
+                new FileWriter(tmpFile,true)) {
             writer.write(jsonOutput);
             writer.write("\n");
             System.out.println("Writing record: "+jsonOutput);
@@ -62,6 +65,8 @@ public class HistoryWriter {
         } finally {
             this.testInstance.clear();
         }
+
+        return tmpFile;
     }
     
 }

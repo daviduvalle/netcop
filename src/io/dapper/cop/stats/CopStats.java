@@ -1,5 +1,6 @@
 package io.dapper.cop.stats;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -15,8 +16,8 @@ public class CopStats {
 
     private final HistoryReader historyReader;
     
-    public CopStats() {
-        historyReader = new HistoryReader();
+    public CopStats(File tmpFile) {
+        historyReader = new HistoryReader(tmpFile);
     }
 
     /**

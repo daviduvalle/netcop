@@ -3,6 +3,7 @@ package io.dapper.cop.history;
 import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.models.TestInstance;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,18 +23,17 @@ import com.google.gson.Gson;
  */
 public class HistoryReader {
 
+    private final File tmpFile;
+
+    public HistoryReader(File tmpFile) {
+        this.tmpFile = tmpFile;
+    }
+
     public List<TestInstance> read() throws IOException {
-        
-        Path storageFile = Paths.get(CopConfiguration.TMP_DIR,
-                CopConfiguration.STORAGE_FILE);
-        
-        if (!storageFile.toFile().exists()) {
-            throw new IOException("Storage file doesn't exists");
-        }
 
         // Reads a file containing different samples stored as separate
         // JSON objects
-        String content = new String(Files.readAllBytes(storageFile));
+        String content = new String(Files.readAllBytes(tmpFile.toPath()));
 
         String[] tests = content.split("\n");
 

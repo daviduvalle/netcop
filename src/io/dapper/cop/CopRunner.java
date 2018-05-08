@@ -3,6 +3,7 @@ package io.dapper.cop;
 import static io.dapper.cop.configuration.CopConfiguration.*;
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.*;
 import java.text.DecimalFormat;
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.history.HistoryWriter;
 import io.dapper.cop.models.TestRecord;
+import io.dapper.cop.stats.CopStats;
 
 public class CopRunner {
 
@@ -33,8 +35,10 @@ public class CopRunner {
         DecimalFormat df = new DecimalFormat("#.00");
         final AtomicInteger runCount = new AtomicInteger(1);
 
+        HistoryWriter historyWriter = new HistoryWriter();
+
         Runnable task = () -> {
-            HistoryWriter historyWriter = new HistoryWriter();
+            historyWriter.createTestInstance();
             List<CompletableFuture<TestRecord>> timeFutures =
                     TestEndpoint.ENDPOINTS.keySet().stream().map(testEndPoint ->
                             CompletableFuture.supplyAsync(
@@ -54,10 +58,12 @@ public class CopRunner {
                     timeFutures.stream().map(CompletableFuture::join).collect(toList());
 
             results.stream().forEach(r -> historyWriter.addRecord(r));
-            historyWriter.write();
+            File tmpFile = historyWriter.write();
 
             // Stop running after the max count is reached
             if (runCount.intValue() == CopConfiguration.MAX_RUN_COUNT) {
+                CopStats copStats = new CopStats(tmpFile);
+                copStats.printStats();
                 executor.shutdown();
             }
 
