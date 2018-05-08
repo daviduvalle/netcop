@@ -1,10 +1,7 @@
 package io.dapper.cop.stats;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.*;
 
 import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.history.HistoryReader;
@@ -40,11 +37,19 @@ public class CopStats {
         }
 
         Map<String, List<LatencyInstance>> reportData = this.loadData(testInstances);
+        Comparator<EndpointStats> comparator = new Comparator<EndpointStats>() {
+            @Override
+            public int compare(EndpointStats o1, EndpointStats o2) {
+                return Double.compare(o1.average, o2.average);
+            }
+        };
+
+        Queue<EndpointStats> statsQueue =
+                new PriorityQueue<EndpointStats>(reportData.keySet().size(),
+                        comparator);
 
         for (String endpoint : reportData.keySet()) {
-            System.out.println("Endpoint: "+endpoint);
             List<LatencyInstance> latencies = reportData.get(endpoint);
-            System.out.println("# of data points loaded: "+latencies.size());
             double average = 0;
 
             // Compute average
@@ -65,12 +70,16 @@ public class CopStats {
             float tmpValue = numerator / denominator;
             double deviation = Math.sqrt(tmpValue);
 
-            System.out.println("\tavg: "+average);
-            System.out.println("\tstd. deviation: "+deviation);
-
-            System.out.println();
+            EndpointStats endpointStats =
+                    new EndpointStats(endpoint, latencies.size(), average,
+                            deviation);
+            statsQueue.offer(endpointStats);
         }
 
+        System.out.println("Endpoint Samples Average Std_deviation");
+        while (!statsQueue.isEmpty()) {
+            System.out.println(statsQueue.poll());
+        }
     }
 
     /**
@@ -98,6 +107,28 @@ public class CopStats {
         }
 
         return endpointToLatencyInstance;
+    }
+
+    private static class EndpointStats {
+        private final String endpoint;
+        private final int dataPoints;
+        private final double average;
+        private final double stdDeviation;
+
+        public EndpointStats(String endpoint, int dataPoints, double average,
+                             double stdDeviation) {
+            this.endpoint = endpoint;
+            this.dataPoints = dataPoints;
+            this.average = average;
+            this.stdDeviation = stdDeviation;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s %d %.2f %.2f",
+                    this.endpoint, this.dataPoints,
+                    this.average, this.stdDeviation);
+        }
     }
 
     private static class LatencyInstance {
