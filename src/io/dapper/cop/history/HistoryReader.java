@@ -42,6 +42,9 @@ public class HistoryReader {
         List<TestInstance> output = Arrays.stream(tests).map(t ->
             gson.fromJson(t, TestInstance.class)).collect(Collectors.toList());
 
+        // Delete tmp file
+        tmpFile.delete();
+
         return output;
     }
 }

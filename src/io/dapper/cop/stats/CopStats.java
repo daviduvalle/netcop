@@ -37,7 +37,9 @@ public class CopStats {
             System.out.println("No data available to show");
         }
 
-        Map<String, List<LatencyInstance>> reportData = this.loadData(testInstances);
+        Map<String, Queue<LatencyInstance>> reportData =
+                this.loadData(testInstances);
+
         Comparator<EndpointStats> comparator = new Comparator<EndpointStats>() {
             @Override
             public int compare(EndpointStats o1, EndpointStats o2) {
@@ -50,7 +52,15 @@ public class CopStats {
                         comparator);
 
         for (String endpoint : reportData.keySet()) {
-            List<LatencyInstance> latencies = reportData.get(endpoint);
+            Queue<LatencyInstance> latencies = reportData.get(endpoint);
+
+            System.out.println("Endpoint "+endpoint);
+
+            while (!latencies.isEmpty()) {
+                System.out.println(latencies.poll().pingTime);
+            }
+
+            /*
             double average = 0;
 
             // Compute average
@@ -75,6 +85,7 @@ public class CopStats {
                     new EndpointStats(endpoint, latencies.size(), average,
                             deviation);
             statsQueue.offer(endpointStats);
+            */
         }
 
         System.out.println("Endpoint Samples Average Std_deviation");
@@ -88,9 +99,14 @@ public class CopStats {
      * @param testInstances latency test instances
      * @return a map containing key = website, value = list of test instances
      */
-    private Map<String, List<LatencyInstance>> loadData(List<TestInstance> testInstances) {
+    private Map<String, Queue<LatencyInstance>> loadData(List<TestInstance>
+                                                             testInstances) {
 
-        HashMap<String, List<LatencyInstance>> endpointToLatencyInstance = new HashMap<>();
+        HashMap<String, Queue<LatencyInstance>> endpointToLatencyInstance = new
+                HashMap<>();
+
+        Comparator<LatencyInstance> comparator = Comparator.comparing
+                (LatencyInstance::getPingTime);
 
         for (TestInstance testInstance : testInstances) {
             for (TestRecord testRecord : testInstance.getTestRecords()) {
@@ -100,7 +116,8 @@ public class CopStats {
                             new LatencyInstance(testInstance.getInstanceDate
                                     (), testRecord.getTime()));
                 } else {
-                    ArrayList<LatencyInstance> latencyInstances = new ArrayList<>();
+                    Queue<LatencyInstance> latencyInstances =
+                            new PriorityQueue<>(comparator);
                     latencyInstances.add(new LatencyInstance(testInstance.getInstanceDate(), testRecord.getTime()));
                     endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
                 }
@@ -134,11 +151,15 @@ public class CopStats {
 
     private static class LatencyInstance {
         private final String timestamp;
-        private final String pingTime;
+        private final double pingTime;
 
         public LatencyInstance(String timestamp, String pingTime) {
             this.timestamp = timestamp;
-            this.pingTime = pingTime;
+            this.pingTime = Double.valueOf(pingTime);
+        }
+
+        public double getPingTime() {
+            return this.pingTime;
         }
     }
 
