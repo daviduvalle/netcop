@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import io.dapper.cop.history.HistoryReader;
+import io.dapper.cop.models.EndpointStats;
 import io.dapper.cop.models.TestInstance;
 import io.dapper.cop.models.TestRecord;
 
@@ -30,6 +31,15 @@ public class CopStats {
         Map<String, Queue<LatencyInstance>> reportData = this.getReportData();
         Queue<EndpointStats> stats = computeStats(reportData);
 
+        if (stats.isEmpty()) {
+            System.out.println("No stats available");
+            return;
+        }
+
+        StatsFileWriter statsFileWriter = new StatsFileWriter(stats);
+        statsFileWriter.writeStats();
+
+        System.out.println();
         System.out.println("Endpoint Samples Average Median Std_deviation");
         while (!stats.isEmpty()) {
             System.out.println(stats.poll());
@@ -154,39 +164,6 @@ public class CopStats {
         }
 
         return endpointToLatencyInstance;
-    }
-
-    private static class EndpointStats {
-        private final String endpoint;
-        private final int dataPoints;
-        private final double average;
-        private final double median;
-        private final double stdDeviation;
-
-        public EndpointStats(String endpoint, int dataPoints,
-                             double average,
-                             double median,
-                             double stdDeviation) {
-            this.endpoint = endpoint;
-            this.dataPoints = dataPoints;
-            this.average = average;
-            this.stdDeviation = stdDeviation;
-            this.median = median;
-        }
-
-        public double getAverage() {
-            return this.average;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s %d %.2f %.2f %.2f",
-                    this.endpoint,
-                    this.dataPoints,
-                    this.average,
-                    this.median,
-                    this.stdDeviation);
-        }
     }
 
     private static class LatencyInstance {
