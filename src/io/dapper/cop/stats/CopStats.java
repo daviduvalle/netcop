@@ -4,26 +4,43 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.history.HistoryReader;
 import io.dapper.cop.models.TestInstance;
 import io.dapper.cop.models.TestRecord;
 
 /**
- * Provides basic statistics based on previous tests
+ * Computes basic statistics based on saved data
  */
 public class CopStats {
 
     private final HistoryReader historyReader;
-    
+
+    /**
+     * Ctr.
+     * @param tmpFile where latency instances are stored
+     */
     public CopStats(File tmpFile) {
         historyReader = new HistoryReader(tmpFile);
     }
 
     /**
-     * Prints the data into the STDOUT
+     * Shows stats in the STOUT and also writes them into a file
      */
-    public void printStats() {
+    public void showStats() {
+        Map<String, Queue<LatencyInstance>> reportData = this.getReportData();
+        Queue<EndpointStats> stats = computeStats(reportData);
+
+        System.out.println("Endpoint Samples Average Median Std_deviation");
+        while (!stats.isEmpty()) {
+            System.out.println(stats.poll());
+        }
+    }
+
+    /**
+     * Loads data in a suitable way to be processed
+     * @return a map containing endpoint -> sorted queue of {@link LatencyInstance}
+     */
+    private Map<String, Queue<LatencyInstance>> getReportData() {
 
         List<TestInstance> testInstances = null;
 
@@ -34,18 +51,21 @@ public class CopStats {
         }
 
         if (testInstances == null || testInstances.isEmpty()) {
-            System.out.println("No data available to show");
+            System.out.println("No data available, temp file was empty");
         }
 
-        Map<String, Queue<LatencyInstance>> reportData =
-                this.loadData(testInstances);
+        return this.loadData(testInstances);
+    }
 
-        Comparator<EndpointStats> comparator = new Comparator<EndpointStats>() {
-            @Override
-            public int compare(EndpointStats o1, EndpointStats o2) {
-                return Double.compare(o1.average, o2.average);
-            }
-        };
+    /**
+     *  Computes avg, median, and standard deviation
+     *  @return a priority queue sorted by endpoint avg. latency
+     */
+    private Queue<EndpointStats> computeStats(Map<String, Queue<LatencyInstance>>
+                                        reportData) {
+
+        Comparator<EndpointStats> comparator = Comparator.comparing
+                (EndpointStats::getAverage);
 
         Queue<EndpointStats> statsQueue =
                 new PriorityQueue<EndpointStats>(reportData.keySet().size(),
@@ -53,45 +73,54 @@ public class CopStats {
 
         for (String endpoint : reportData.keySet()) {
             Queue<LatencyInstance> latencies = reportData.get(endpoint);
+            Queue<LatencyInstance> latenciesCopy = new PriorityQueue<>
+                    (latencies);
 
-            System.out.println("Endpoint "+endpoint);
-
-            while (!latencies.isEmpty()) {
-                System.out.println(latencies.poll().pingTime);
-            }
-
-            /*
             double average = 0;
+            double median = 0;
+            int latenciesLength = latencies.size();
+            int medianPos = latenciesLength / 2;
+            boolean isOdd = latenciesLength % 2 != 0 ? true : false;
+            medianPos = isOdd ? medianPos : medianPos - 1;
 
-            // Compute average
-            for (LatencyInstance latencyInstance : latencies) {
-                average += Double.valueOf(latencyInstance.pingTime);
+            // Compute average and mean
+            for (int i = 0; i < latenciesLength; i++) {
+                double tmp = latencies.poll().pingTime;
+                if (isOdd && i == medianPos) {
+                    median = tmp;
+                } else if (!isOdd && i == medianPos){
+                    median = (tmp + latencies.peek().pingTime) / 2;
+                }
+
+                average += tmp;
             }
 
-            average = average / latencies.size();
+            average = average / latenciesLength;
 
             // Compute std. deviation
-            float numerator = 0;
-            float denominator = latencies.size() - 1;
-            for (LatencyInstance latencyInstance : latencies) {
-                numerator += Math.pow(Float.valueOf(latencyInstance.pingTime)
+            double numerator = 0;
+            double denominator = latenciesLength - 1;
+            for (LatencyInstance latencyInstance : latenciesCopy) {
+                numerator += Math.pow(Double.valueOf(latencyInstance.pingTime)
                                 - average, 2);
             }
 
-            float tmpValue = numerator / denominator;
+            double tmpValue = numerator / denominator;
             double deviation = Math.sqrt(tmpValue);
 
+
             EndpointStats endpointStats =
-                    new EndpointStats(endpoint, latencies.size(), average,
+                    new EndpointStats(
+                            endpoint,
+                            latenciesLength,
+                            average,
+                            median,
                             deviation);
+
             statsQueue.offer(endpointStats);
-            */
         }
 
-        System.out.println("Endpoint Samples Average Std_deviation");
-        while (!statsQueue.isEmpty()) {
-            System.out.println(statsQueue.poll());
-        }
+        return statsQueue;
     }
 
     /**
@@ -131,21 +160,32 @@ public class CopStats {
         private final String endpoint;
         private final int dataPoints;
         private final double average;
+        private final double median;
         private final double stdDeviation;
 
-        public EndpointStats(String endpoint, int dataPoints, double average,
+        public EndpointStats(String endpoint, int dataPoints,
+                             double average,
+                             double median,
                              double stdDeviation) {
             this.endpoint = endpoint;
             this.dataPoints = dataPoints;
             this.average = average;
             this.stdDeviation = stdDeviation;
+            this.median = median;
+        }
+
+        public double getAverage() {
+            return this.average;
         }
 
         @Override
         public String toString() {
-            return String.format("%s %d %.2f %.2f",
-                    this.endpoint, this.dataPoints,
-                    this.average, this.stdDeviation);
+            return String.format("%s %d %.2f %.2f %.2f",
+                    this.endpoint,
+                    this.dataPoints,
+                    this.average,
+                    this.median,
+                    this.stdDeviation);
         }
     }
 

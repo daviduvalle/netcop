@@ -42,10 +42,6 @@ public class Cop {
         }
         else if (line.hasOption("config")) {
             CopConfigurationFormatter.printConfiguration();
-        }
-        else if (line.hasOption("stats")) {
-            //CopStats copStats = new CopStats();
-            //copStats.printStats();
         } else if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("netcop", options);

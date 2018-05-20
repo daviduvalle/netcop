@@ -17,7 +17,6 @@ import io.dapper.cop.stats.CopStats;
 public class CopRunner {
 
     public void run() {
-
         // Main background thread that runs
         // at a fixed rate
         ScheduledExecutorService executor = 
@@ -63,13 +62,14 @@ public class CopRunner {
             // Stop running after the max count is reached
             if (runCount.intValue() == CopConfiguration.MAX_RUN_COUNT) {
                 CopStats copStats = new CopStats(tmpFile);
-                copStats.printStats();
+                copStats.showStats();
                 executor.shutdown();
             }
 
             runCount.incrementAndGet();
         };
-        
+
+        // Execute the task in an interval
         executor.scheduleAtFixedRate(task, 0,
                 SECONDS_INTERVAL, TimeUnit.SECONDS);
     }
