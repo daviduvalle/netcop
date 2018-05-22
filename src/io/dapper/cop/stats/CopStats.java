@@ -12,7 +12,7 @@ import io.dapper.cop.models.TestRecord;
 /**
  * Computes basic statistics based on saved data
  */
-public class CopStats {
+public final class CopStats {
 
     private final HistoryReader historyReader;
 
@@ -28,7 +28,7 @@ public class CopStats {
      * Shows stats in the STOUT and also writes them into a file
      */
     public void showStats() {
-        Map<String, Queue<LatencyInstance>> reportData = this.getReportData();
+        Map<String, Queue<Double>> reportData = this.getReportData();
         Queue<EndpointStats> stats = computeStats(reportData);
 
         if (stats.isEmpty()) {
@@ -48,9 +48,9 @@ public class CopStats {
 
     /**
      * Loads data in a suitable way to be processed
-     * @return a map containing endpoint -> sorted queue of {@link LatencyInstance}
+     * @return a map containing endpoint -> sorted queue of ping instances
      */
-    private Map<String, Queue<LatencyInstance>> getReportData() {
+    private Map<String, Queue<Double>> getReportData() {
 
         List<TestInstance> testInstances = null;
 
@@ -71,7 +71,7 @@ public class CopStats {
      *  Computes avg, median, and standard deviation
      *  @return a priority queue sorted by endpoint avg. latency
      */
-    private Queue<EndpointStats> computeStats(Map<String, Queue<LatencyInstance>>
+    private Queue<EndpointStats> computeStats(Map<String, Queue<Double>>
                                         reportData) {
 
         Comparator<EndpointStats> comparator = Comparator.comparing
@@ -82,9 +82,8 @@ public class CopStats {
                         comparator);
 
         for (String endpoint : reportData.keySet()) {
-            Queue<LatencyInstance> latencies = reportData.get(endpoint);
-            Queue<LatencyInstance> latenciesCopy = new PriorityQueue<>
-                    (latencies);
+            Queue<Double> latencies = reportData.get(endpoint);
+            Queue<Double> latenciesCopy = new PriorityQueue<>(latencies);
 
             double average = 0;
             double median = 0;
@@ -95,11 +94,11 @@ public class CopStats {
 
             // Compute average and mean
             for (int i = 0; i < latenciesLength; i++) {
-                double tmp = latencies.poll().pingTime;
+                double tmp = latencies.poll();
                 if (isOdd && i == medianPos) {
                     median = tmp;
                 } else if (!isOdd && i == medianPos){
-                    median = (tmp + latencies.peek().pingTime) / 2;
+                    median = (tmp + latencies.peek()) / 2;
                 }
 
                 average += tmp;
@@ -110,9 +109,8 @@ public class CopStats {
             // Compute std. deviation
             double numerator = 0;
             double denominator = latenciesLength - 1;
-            for (LatencyInstance latencyInstance : latenciesCopy) {
-                numerator += Math.pow(Double.valueOf(latencyInstance.pingTime)
-                                - average, 2);
+            for (Double latencyInstance : latenciesCopy) {
+                numerator += Math.pow(latencyInstance - average, 2);
             }
 
             double tmpValue = numerator / denominator;
@@ -138,46 +136,26 @@ public class CopStats {
      * @param testInstances latency test instances
      * @return a map containing key = website, value = list of test instances
      */
-    private Map<String, Queue<LatencyInstance>> loadData(List<TestInstance>
-                                                             testInstances) {
+    private Map<String, Queue<Double>> loadData(
+            List<TestInstance> testInstances) {
 
-        HashMap<String, Queue<LatencyInstance>> endpointToLatencyInstance = new
+        HashMap<String, Queue<Double>> endpointToLatencyInstance = new
                 HashMap<>();
-
-        Comparator<LatencyInstance> comparator = Comparator.comparing
-                (LatencyInstance::getPingTime);
 
         for (TestInstance testInstance : testInstances) {
             for (TestRecord testRecord : testInstance.getTestRecords()) {
                 if (endpointToLatencyInstance.containsKey(testRecord.getWebsiteName())) {
-                    endpointToLatencyInstance.get(
-                            testRecord.getWebsiteName()).add(
-                            new LatencyInstance(testInstance.getInstanceDate
-                                    (), testRecord.getTime()));
+                    endpointToLatencyInstance.get(testRecord.getWebsiteName()).add(Double.valueOf(testRecord.getTime()));
                 } else {
-                    Queue<LatencyInstance> latencyInstances =
-                            new PriorityQueue<>(comparator);
-                    latencyInstances.add(new LatencyInstance(testInstance.getInstanceDate(), testRecord.getTime()));
+                    Queue<Double> latencyInstances =
+                            new PriorityQueue<>();
+                    latencyInstances.add(Double.valueOf(testRecord.getTime()));
                     endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
                 }
             }
         }
 
         return endpointToLatencyInstance;
-    }
-
-    private static class LatencyInstance {
-        private final String timestamp;
-        private final double pingTime;
-
-        public LatencyInstance(String timestamp, String pingTime) {
-            this.timestamp = timestamp;
-            this.pingTime = Double.valueOf(pingTime);
-        }
-
-        public double getPingTime() {
-            return this.pingTime;
-        }
     }
 
 }
