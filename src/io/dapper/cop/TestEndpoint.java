@@ -15,6 +15,7 @@ public class TestEndpoint {
         testEndpoints.put("facebook", "http://www.facebook.com");
         testEndpoints.put("amazon", "http://www.amazon.com");
         testEndpoints.put("google", "http://www.google.com");
+        testEndpoints.put("netlflix", "http://www.netflix.com");
         
         ENDPOINTS = Collections.unmodifiableMap(testEndpoints);
     }

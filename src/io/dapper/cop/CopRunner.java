@@ -43,12 +43,10 @@ public class CopRunner {
                             CompletableFuture.supplyAsync(
                                     () -> {
                                         HTTPPinger httpPinger = new HTTPPinger();
-                                        double time = httpPinger.ping
-                                                (TestEndpoint.ENDPOINTS
-                                                        .get(testEndPoint));
-                                        TestRecord testRecord = new
-                                                TestRecord(testEndPoint,
-                                                df.format(time));
+                                        double time =
+                                                httpPinger.ping(TestEndpoint.ENDPOINTS.get(testEndPoint));
+                                        TestRecord testRecord =
+                                                new TestRecord(testEndPoint, df.format(time));
                                         return testRecord;
                                     }, requestThreadPool)).collect(
                             toList());
