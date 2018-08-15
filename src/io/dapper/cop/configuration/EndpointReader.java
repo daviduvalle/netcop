@@ -9,34 +9,51 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EndpointReader {
+/**
+ * Reads, fixes, validates a list of endpoint
+ * as strings given a file of endpoints.
+ */
+public final class EndpointReader {
 
-    public static void main(String[] args) {
-        loadEndpoints("endpoints.txt");
+    private final String endpointsFile;
+
+    /**
+     * Reads a file of endpoints
+     * @param endpointsFile input file
+     */
+    public EndpointReader(String endpointsFile) {
+        this.endpointsFile = endpointsFile;
     }
 
-    private static void loadEndpoints(String endpointsFile) {
+    /**
+     * Load endpoints from a file
+     * @return list of endpoints
+     * @throws IOException if unable to read the file
+     */
+    public List<String> loadEndpoints() throws IOException {
+
+        if (endpointsFile == null || endpointsFile.isEmpty()) {
+            throw new IOException("Endpoints file not specified or empty");
+        }
+
         File inputFile = new File(endpointsFile);
 
         if (!inputFile.exists()) {
-            System.out.println("input file doesn't exists, terminating");
+            throw new IOException("File doesn't exists");
         }
 
         String content = null;
+
         try {
             content = new String(Files.readAllBytes(inputFile.toPath()));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         String[] endpoints = content.split("\n");
         endpoints = schemeFix(endpoints);
 
-        List<String> validEndpoints =
-                Arrays.stream(endpoints).filter(x -> isValid(x)).collect(Collectors.toList());
-
-        validEndpoints.forEach(x -> System.out.println(x));
-
+        return Arrays.stream(endpoints).filter(x -> isValid(x)).collect(Collectors.toList());
     }
 
     /**
@@ -45,7 +62,7 @@ public class EndpointReader {
      * @param endpoints array of raw endpoints
      * @return an array of endpoints with scheme
      */
-    private static String[] schemeFix(String[] endpoints) {
+    private String[] schemeFix(String[] endpoints) {
 
         String[] finalEndpoints = new String[endpoints.length];
         int count = 0;
@@ -66,7 +83,7 @@ public class EndpointReader {
      * @param endpoint a string representing an endpoint
      * @return true if valid URL, false otherwise
      */
-    private static boolean isValid(String endpoint) {
+    private boolean isValid(String endpoint) {
         String[] scheme = {"http"};
         UrlValidator urlValidator = new UrlValidator(scheme);
 

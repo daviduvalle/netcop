@@ -1,6 +1,7 @@
 package io.dapper.cop;
 
 import io.dapper.cop.configuration.CopConfiguration;
+import io.dapper.cop.configuration.EndpointReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -12,39 +13,45 @@ import io.dapper.cop.configuration.CopConfigurationFormatter;
 import io.dapper.cop.stats.CopStats;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Cop CLI
  */
 public class Cop {
+
+    private static final String FILE_OPTION = "file";
+    private static final String HELP_OPTION = "help";
     
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         
         Options options = new Options();
-        options.addOption("help", "prints this help");
-        options.addOption("stats", "show text based stats");
-        options.addOption("config", "prints version and configuration");
-        
+        options.addOption(FILE_OPTION, true, "file containing endpoints each in a new line");
+        options.addOption(HELP_OPTION, "prints this help");
+
         CommandLineParser parser = new DefaultParser();
         CommandLine line = null;
         
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            System.out.println("Error while parsing arguments");
-            e.printStackTrace();
+            throw e;
         }
 
-        if (line.getOptions().length == 0) {
-            CopRunner copRunner = new CopRunner();
-            System.out.println("Netcop "+ CopConfiguration.COP_VERSION);
-            copRunner.run();
-        }
-        else if (line.hasOption("config")) {
-            CopConfigurationFormatter.printConfiguration();
-        } else if (line.hasOption("help")) {
+        if (line.hasOption(HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("netcop", options);
+            formatter.printHelp("netcop -file yourfile.txt", options);
+            return;
         }
+
+        if (!line.hasOption(FILE_OPTION)) {
+            throw new IllegalArgumentException("File not specified as argument, terminating.");
+        }
+
+        EndpointReader endpointReader = new EndpointReader(line.getOptionValue(FILE_OPTION));
+        List<String> endpoints = endpointReader.loadEndpoints();
+
+        CopRunner copRunner = new CopRunner(endpoints);
+        copRunner.run();
     }
 }

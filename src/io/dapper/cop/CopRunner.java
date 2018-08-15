@@ -14,7 +14,13 @@ import io.dapper.cop.history.HistoryWriter;
 import io.dapper.cop.models.TestRecord;
 import io.dapper.cop.stats.CopStats;
 
-public class CopRunner {
+public final class CopRunner {
+
+    private final List<String> endpoints;
+
+    public CopRunner(List<String> endpoints) {
+        this.endpoints = endpoints;
+    }
 
     public void run() {
         // Main background thread that runs
@@ -39,17 +45,14 @@ public class CopRunner {
         Runnable task = () -> {
             historyWriter.createTestInstance();
             List<CompletableFuture<TestRecord>> timeFutures =
-                    TestEndpoint.ENDPOINTS.keySet().stream().map(testEndPoint ->
+                    endpoints.stream().map(testEndPoint ->
                             CompletableFuture.supplyAsync(
                                     () -> {
                                         HTTPPinger httpPinger = new HTTPPinger();
-                                        double time =
-                                                httpPinger.ping(TestEndpoint.ENDPOINTS.get(testEndPoint));
-                                        TestRecord testRecord =
-                                                new TestRecord(testEndPoint, df.format(time));
+                                        double time = httpPinger.ping(testEndPoint);
+                                        TestRecord testRecord = new TestRecord(testEndPoint, df.format(time));
                                         return testRecord;
-                                    }, requestThreadPool)).collect(
-                            toList());
+                                    }, requestThreadPool)).collect(toList());
 
             List<TestRecord> results =
                     timeFutures.stream().map(CompletableFuture::join).collect(toList());
