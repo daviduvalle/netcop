@@ -22,7 +22,12 @@ public class Cop {
 
     private static final String FILE_OPTION = "file";
     private static final String HELP_OPTION = "help";
-    
+
+    /**
+     * Gathers CLI args and runs the cop
+     * @param args CLI args
+     * @throws Exception if unable to process input parameters
+     */
     public static void main(String[] args) throws Exception {
         
         Options options = new Options();
@@ -45,13 +50,13 @@ public class Cop {
         }
 
         if (!line.hasOption(FILE_OPTION)) {
-            throw new IllegalArgumentException("File not specified as argument, terminating.");
+            throw new IllegalArgumentException("Input file not specified as argument, terminating.");
         }
 
         EndpointReader endpointReader = new EndpointReader(line.getOptionValue(FILE_OPTION));
         List<String> endpoints = endpointReader.loadEndpoints();
 
-        CopRunner copRunner = new CopRunner(endpoints);
+        CopRunner copRunner = new CopRunner(endpoints, true);
         copRunner.run();
     }
 }

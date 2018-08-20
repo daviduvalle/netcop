@@ -1,8 +1,9 @@
-package io.dapper.cop;
+package io.dapper.cop.net;
 
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -24,9 +25,10 @@ public class HTTPPinger {
     private static RequestConfig.Builder requestBuilder = RequestConfig
             .custom();
     static {
-        requestBuilder = requestBuilder.setConnectTimeout(TIMEOUT)
-                .setConnectionRequestTimeout(TIMEOUT).setCookieSpec(CookieSpecs
-                        .STANDARD);
+        requestBuilder =
+                requestBuilder.setConnectTimeout(TIMEOUT)
+                        .setConnectionRequestTimeout(TIMEOUT)
+                        .setCookieSpec(CookieSpecs.STANDARD);
         requestConfig = requestBuilder.build();
     }
 
@@ -43,7 +45,7 @@ public class HTTPPinger {
         try {
             HttpResponse response = client.execute(request);
 
-            if (response.getStatusLine().getStatusCode() == 200) {
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 stopWatch.stop();
             }
         } catch (Exception e) {

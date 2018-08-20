@@ -35,7 +35,7 @@ public final class StatsFileWriter {
         }
 
         try {
-            File temp = File.createTempFile("netcop_stats", null);
+            File temp = File.createTempFile("netcop_stats.", null);
 
             System.out.println();
             System.out.println("Writing stats at: "+temp.getAbsolutePath());
