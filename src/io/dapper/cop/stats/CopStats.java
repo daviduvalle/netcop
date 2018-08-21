@@ -1,10 +1,7 @@
 package io.dapper.cop.stats;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
-import io.dapper.cop.history.HistoryReader;
 import io.dapper.cop.models.EndpointStats;
 import io.dapper.cop.models.TestInstance;
 import io.dapper.cop.models.TestRecord;
@@ -14,21 +11,23 @@ import io.dapper.cop.models.TestRecord;
  */
 public final class CopStats {
 
-    private final HistoryReader historyReader;
+    private final List<TestInstance> testInstances;
+    private final boolean writeStats;
 
     /**
-     * Ctr.
-     * @param tmpFile where latency instances are stored
+     * Provides stats
+     * @param testInstances list of test instances
      */
-    public CopStats(File tmpFile) {
-        historyReader = new HistoryReader(tmpFile);
+    public CopStats(List<TestInstance> testInstances, boolean writeStats) {
+        this.testInstances = testInstances;
+        this.writeStats = writeStats;
     }
 
     /**
      * Shows stats in the STOUT and also writes them into a file
      */
     public void showStats() {
-        Map<String, Queue<Double>> reportData = this.getReportData();
+        Map<String, Queue<Double>> reportData = this.loadData(this.testInstances);
         Queue<EndpointStats> stats = computeStats(reportData);
 
         if (stats.isEmpty()) {
@@ -36,8 +35,10 @@ public final class CopStats {
             return;
         }
 
-        StatsFileWriter statsFileWriter = new StatsFileWriter(stats);
-        statsFileWriter.writeStats();
+        if (this.writeStats) {
+            StatsFileWriter statsFileWriter = new StatsFileWriter(stats);
+            statsFileWriter.writeStats();
+        }
 
         System.out.println();
         System.out.println("Endpoint Samples Average Median Std_deviation");
@@ -47,24 +48,30 @@ public final class CopStats {
     }
 
     /**
-     * Loads data in a suitable way to be processed
-     * @return a map containing endpoint -> sorted queue of ping instances
+     * Loads test instances into a map where the key is the endpoint being tested
+     * @param testInstances latency test instances
+     * @return a map containing key = website, value = list of test instances
      */
-    private Map<String, Queue<Double>> getReportData() {
+    private Map<String, Queue<Double>> loadData(
+            List<TestInstance> testInstances) {
 
-        List<TestInstance> testInstances = null;
+        HashMap<String, Queue<Double>> endpointToLatencyInstance = new
+                HashMap<>();
 
-        try {
-            testInstances = historyReader.read();
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (TestInstance testInstance : testInstances) {
+            for (TestRecord testRecord : testInstance.getTestRecords()) {
+                if (endpointToLatencyInstance.containsKey(testRecord.getWebsiteName())) {
+                    endpointToLatencyInstance.get(testRecord.getWebsiteName()).add(Double.valueOf(testRecord.getTime()));
+                } else {
+                    Queue<Double> latencyInstances =
+                            new PriorityQueue<>();
+                    latencyInstances.add(Double.valueOf(testRecord.getTime()));
+                    endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
+                }
+            }
         }
 
-        if (testInstances == null || testInstances.isEmpty()) {
-            System.out.println("No data available, temp file was empty");
-        }
-
-        return this.loadData(testInstances);
+        return endpointToLatencyInstance;
     }
 
     /**
@@ -92,7 +99,7 @@ public final class CopStats {
             boolean isOdd = latenciesLength % 2 != 0 ? true : false;
             medianPos = isOdd ? medianPos : medianPos - 1;
 
-            // Compute average and mean
+            // Compute average and median
             for (int i = 0; i < latenciesLength; i++) {
                 double tmp = latencies.poll();
                 if (isOdd && i == medianPos) {
@@ -130,32 +137,4 @@ public final class CopStats {
 
         return statsQueue;
     }
-
-    /**
-     * Loads test instances into a map where the key is the website being tested
-     * @param testInstances latency test instances
-     * @return a map containing key = website, value = list of test instances
-     */
-    private Map<String, Queue<Double>> loadData(
-            List<TestInstance> testInstances) {
-
-        HashMap<String, Queue<Double>> endpointToLatencyInstance = new
-                HashMap<>();
-
-        for (TestInstance testInstance : testInstances) {
-            for (TestRecord testRecord : testInstance.getTestRecords()) {
-                if (endpointToLatencyInstance.containsKey(testRecord.getWebsiteName())) {
-                    endpointToLatencyInstance.get(testRecord.getWebsiteName()).add(Double.valueOf(testRecord.getTime()));
-                } else {
-                    Queue<Double> latencyInstances =
-                            new PriorityQueue<>();
-                    latencyInstances.add(Double.valueOf(testRecord.getTime()));
-                    endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
-                }
-            }
-        }
-
-        return endpointToLatencyInstance;
-    }
-
 }
