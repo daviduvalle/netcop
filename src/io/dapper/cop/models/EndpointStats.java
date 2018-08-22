@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
  * used by a comparator to sort
  */
 public class EndpointStats {
+    private static final DecimalFormat df = new DecimalFormat("#.##");
     private final String endpoint;
     private final int dataPoints;
     private final double average;
@@ -25,7 +26,6 @@ public class EndpointStats {
     }
 
     private double formatter(double input) {
-        DecimalFormat df = new DecimalFormat("#.##");
         return Double.parseDouble(df.format(input));
     }
 
@@ -35,7 +35,9 @@ public class EndpointStats {
 
     @Override
     public String toString() {
-        return String.format("%s %d %.2f %.2f %.2f",
+        int padding = 32 - this.endpoint.length();
+        String format = "%s%" + padding + "d%10.2f%10.2f%10.2f";
+        return String.format(format,
                 this.endpoint,
                 this.dataPoints,
                 this.average,

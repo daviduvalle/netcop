@@ -17,6 +17,13 @@ import io.dapper.cop.models.TestRecord;
 import io.dapper.cop.net.HTTPPinger;
 import io.dapper.cop.stats.CopStats;
 
+/**
+ * Runs parallel HTTP pings and collects timing data per endpoint
+ * The network requests run by a background thread on a configured
+ * time interval for a certain number of cycles.
+ * For example a 5 secs interval of 10 (max_run_count) cycles will
+ * 10 times in total with a pause of 5 seconds every time.
+ */
 public final class CopRunner {
 
     private static final DecimalFormat df = new DecimalFormat("#.00");

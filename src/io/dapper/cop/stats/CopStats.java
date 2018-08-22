@@ -41,7 +41,10 @@ public final class CopStats {
         }
 
         System.out.println();
-        System.out.println("Endpoint Samples Average Median Std_deviation");
+        //System.out.format("Endpoint\t\t\t\t\tSamples\t\tAverage\t\tMedian\t\tStd_deviation");
+        System.out.format("%s%24s%10s%10s%10s",
+                "Endpoint", "Samples", "Average", "Median", "\u03C3");
+        System.out.println();
         while (!stats.isEmpty()) {
             System.out.println(stats.poll());
         }

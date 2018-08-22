@@ -92,6 +92,7 @@ public class HistoryWriter {
                 this.testInstance.clear();
             }
         } else {
+            System.out.println("running!");
             testInstances.add(this.testInstance);
         }
     }
