@@ -35,8 +35,8 @@ public class HistoryWriter {
         if (this.recordToFile) {
             try {
                 tmpFile = File.createTempFile("netcop.", null);
-                System.out.println("Writing data to: " + tmpFile
-                        .getAbsolutePath().toString());
+                System.out.println("Writing collected samples in: "
+                        + tmpFile.getAbsolutePath().toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -85,14 +85,14 @@ public class HistoryWriter {
                          new FileWriter(tmpFile, true)) {
                 writer.write(jsonOutput);
                 writer.write("\n");
-                System.out.println("Writing record: " + jsonOutput);
+                System.out.print(".");
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 this.testInstance.clear();
             }
         } else {
-            System.out.println("running!");
+            System.out.print(".");
             testInstances.add(this.testInstance);
         }
     }
