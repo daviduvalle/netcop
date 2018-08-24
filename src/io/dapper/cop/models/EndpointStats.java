@@ -35,7 +35,7 @@ public class EndpointStats {
 
     @Override
     public String toString() {
-        int padding = 32 - this.endpoint.length();
+        int padding = 38 - this.endpoint.length();
         String format = "%s%" + padding + "d%10.2f%10.2f%10.2f";
         return String.format(format,
                 this.endpoint,
