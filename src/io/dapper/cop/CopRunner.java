@@ -70,6 +70,7 @@ public final class CopRunner {
                     timeFutures.stream().map(CompletableFuture::join).collect(toList());
 
             results.stream().forEach(r -> historyWriter.addRecord(r));
+
             historyWriter.write();
 
             // Stop running after the max count is reached

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestInstance {
+public final class TestInstance {
 
     private String dateTime;
     private List<TestRecord> testRecords;

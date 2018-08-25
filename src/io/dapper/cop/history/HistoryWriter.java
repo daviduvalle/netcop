@@ -23,24 +23,14 @@ import io.dapper.cop.models.TestRecord;
 public class HistoryWriter {
 
     private final boolean recordToFile;
+    private final List<TestInstance> testInstances;
     private TestInstance testInstance;
-    private List<TestInstance> testInstances;
     private File tmpFile;
 
     public HistoryWriter(boolean recordToFile) {
 
         this.testInstances = new ArrayList<>();
         this.recordToFile = recordToFile;
-
-        if (this.recordToFile) {
-            try {
-                tmpFile = File.createTempFile("netcop.", null);
-                System.out.println("Writing collected samples in: "
-                        + tmpFile.getAbsolutePath().toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void createTestInstance() {
@@ -80,21 +70,46 @@ public class HistoryWriter {
         if (recordToFile) {
             Gson gson = new Gson();
             String jsonOutput = gson.toJson(this.testInstance);
+            FileWriter writer = null;
 
-            try (FileWriter writer =
-                         new FileWriter(tmpFile, true)) {
+            try {
+                this.tmpFile = getTempFile();
+                writer = new FileWriter(this.tmpFile, true);
                 writer.write(jsonOutput);
                 writer.write("\n");
-                System.out.print(".");
-            } catch (Exception e) {
+                writer.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                this.testInstance.clear();
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+            System.out.print(".");
         } else {
             System.out.print(".");
             testInstances.add(this.testInstance);
         }
+    }
+
+    /**
+     * Creates a new temp file or return a
+     * reference to an existing one
+     * @return temporal file
+     * @throws IOException if cannot create a temp file
+     */
+    private File getTempFile() throws IOException {
+        if (this.tmpFile == null) {
+            tmpFile = File.createTempFile("netcop.", null);
+            System.out.println("Writing collected samples in: "
+                    + tmpFile.getAbsolutePath().toString());
+        }
+
+        return tmpFile;
     }
     
 }

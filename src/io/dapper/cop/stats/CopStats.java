@@ -44,6 +44,7 @@ public final class CopStats {
         System.out.format("%s%30s%10s%10s%10s",
                 "Endpoint", "Samples", "Average", "Median", "Deviation");
         System.out.println();
+
         while (!stats.isEmpty()) {
             System.out.println(stats.poll());
         }

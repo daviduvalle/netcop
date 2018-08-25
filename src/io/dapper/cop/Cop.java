@@ -1,6 +1,5 @@
 package io.dapper.cop;
 
-import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.configuration.EndpointReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -9,16 +8,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import io.dapper.cop.configuration.CopConfigurationFormatter;
-import io.dapper.cop.stats.CopStats;
-
-import java.io.File;
 import java.util.List;
 
 /**
  * Cop CLI
  */
-public class Cop {
+public final class Cop {
 
     private static final String FILE_OPTION = "file";
     private static final String HELP_OPTION = "help";

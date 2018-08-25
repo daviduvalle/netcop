@@ -1,5 +1,6 @@
 package io.dapper.cop.net;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
@@ -16,7 +17,7 @@ import com.google.common.base.Stopwatch;
  * Simple http client that connects to a http server
  * and reports back the time spent during connection
  */
-public class HTTPPinger {
+public final class HTTPPinger {
 
     // Same timeout used for connect and connection request
     // change them if needed.
@@ -37,18 +38,18 @@ public class HTTPPinger {
      * @return ping time
      */
     public long ping(String endpoint) {
-
         HttpClient client = HttpClientBuilder.create().
                 setDefaultRequestConfig(requestConfig).build();
         HttpGet request = new HttpGet(endpoint);
         Stopwatch stopWatch = Stopwatch.createStarted();
+
         try {
             HttpResponse response = client.execute(request);
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 stopWatch.stop();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             stopWatch.stop();
         }

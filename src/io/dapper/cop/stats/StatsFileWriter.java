@@ -34,6 +34,8 @@ public final class StatsFileWriter {
             finalList.add(copy.poll());
         }
 
+        FileWriter fileWriter = null;
+
         try {
             File temp = File.createTempFile("netcop_stats.", null);
 
@@ -41,11 +43,19 @@ public final class StatsFileWriter {
             System.out.println("Writing stats at: "+temp.getAbsolutePath());
             Gson gson = new Gson();
             String jsonOutput = gson.toJson(finalList);
-            FileWriter fw = new FileWriter(temp);
-            fw.write(jsonOutput);
-            fw.close();
+            fileWriter = new FileWriter(temp);
+            fileWriter.write(jsonOutput);
+            fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
