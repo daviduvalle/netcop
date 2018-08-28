@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -51,9 +53,25 @@ public final class EndpointReader {
         }
 
         String[] endpoints = content.split("\n");
+        endpoints = removeDuplicates(endpoints);
         endpoints = schemeFix(endpoints);
 
         return Arrays.stream(endpoints).filter(x -> isValid(x)).collect(Collectors.toList());
+    }
+
+    /**
+     * Removes duplicates from the endpoints
+     * @param endpoints raw endpoints with possible duplicates
+     * @return list of unique endpoints
+     */
+    private String[] removeDuplicates(String[] endpoints) {
+        Set<String> set = new HashSet<>();
+
+        for (int i = 0; i < endpoints.length; i++) {
+            set.add(endpoints[i]);
+        }
+
+        return set.toArray(new String[set.size()]);
     }
 
     /**
