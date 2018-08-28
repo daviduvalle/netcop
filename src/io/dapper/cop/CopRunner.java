@@ -1,6 +1,5 @@
 package io.dapper.cop;
 
-import static io.dapper.cop.configuration.CopConfiguration.*;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.util.concurrent.*;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.history.HistoryReader;
 import io.dapper.cop.history.HistoryWriter;
 import io.dapper.cop.models.TestInstance;
@@ -30,15 +28,21 @@ public final class CopRunner {
 
     private final List<String> endpoints;
     private final boolean writeToFiles;
+    private final int secondsInterval;
+    private final int maxRunCount;
 
     /**
      * Creates a cop runner instance
      * @param endpoints list of endpoints
      * @param writeToFiles determines if tests will be persisted or not
+     * @param secondsInterval interval of seconds to wait before re-testing
+     * @param maxRunCount max number of tests to run
      */
-    public CopRunner(List<String> endpoints, boolean writeToFiles) {
+    public CopRunner(List<String> endpoints, boolean writeToFiles, int secondsInterval, int maxRunCount) {
         this.endpoints = endpoints;
         this.writeToFiles = writeToFiles;
+        this.secondsInterval = secondsInterval;
+        this.maxRunCount = maxRunCount;
     }
 
     public void run() {
@@ -74,7 +78,7 @@ public final class CopRunner {
             historyWriter.write();
 
             // Stop running after the max count is reached
-            if (runCount.intValue() == CopConfiguration.MAX_RUN_COUNT) {
+            if (runCount.intValue() == this.maxRunCount) {
                 List<TestInstance> testInstances = this.getTestInstances(historyWriter);
                 CopStats copStats = new CopStats(testInstances, writeToFiles);
                 copStats.showStats();
@@ -86,7 +90,7 @@ public final class CopRunner {
 
         // Execute the task in an interval
         executor.scheduleAtFixedRate(task, 0,
-                SECONDS_INTERVAL, TimeUnit.SECONDS);
+                this.secondsInterval, TimeUnit.SECONDS);
     }
 
     /**

@@ -1,5 +1,6 @@
 package io.dapper.cop;
 
+import static io.dapper.cop.configuration.CopConfiguration.*;
 import io.dapper.cop.configuration.EndpointReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -59,7 +60,7 @@ public final class Cop {
         EndpointReader endpointReader = new EndpointReader(line.getOptionValue(FILE_OPTION));
         List<String> endpoints = endpointReader.loadEndpoints();
 
-        CopRunner copRunner = new CopRunner(endpoints, persistData);
+        CopRunner copRunner = new CopRunner(endpoints, persistData, DEFAULT_SECONDS_INTERVAL, DEFAULT_MAX_RUN_COUNT);
         copRunner.run();
     }
 }
