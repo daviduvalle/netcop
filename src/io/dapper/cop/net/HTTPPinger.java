@@ -21,7 +21,7 @@ public final class HTTPPinger {
 
     // Same timeout used for connect and connection request
     // change them if needed.
-    private final static int TIMEOUT = 2000;
+    private final static int TIMEOUT = 4000;
     private final static RequestConfig requestConfig;
     private static RequestConfig.Builder requestBuilder = RequestConfig
             .custom();
@@ -29,7 +29,7 @@ public final class HTTPPinger {
         requestBuilder =
                 requestBuilder.setConnectTimeout(TIMEOUT)
                         .setConnectionRequestTimeout(TIMEOUT)
-                        .setCookieSpec(CookieSpecs.STANDARD);
+                        .setCookieSpec(CookieSpecs.STANDARD).setRedirectsEnabled(false);
         requestConfig = requestBuilder.build();
     }
 
