@@ -67,7 +67,7 @@ public final class EndpointReader {
         String[] finalEndpoints = new String[endpoints.length];
         int count = 0;
         for (String endpoint : endpoints) {
-            if (endpoint.startsWith("http://")) {
+            if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
                 finalEndpoints[count] = endpoint;
             } else {
                 finalEndpoints[count] = "http://" + endpoint;
@@ -84,7 +84,7 @@ public final class EndpointReader {
      * @return true if valid URL, false otherwise
      */
     private boolean isValid(String endpoint) {
-        String[] scheme = {"http"};
+        String[] scheme = {"http", "https"};
         UrlValidator urlValidator = new UrlValidator(scheme);
 
         return urlValidator.isValid(endpoint);
