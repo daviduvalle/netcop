@@ -57,7 +57,6 @@ final class CopRunner {
         Executor requestThreadPool = getFixedThreadPool((short) 10);
         final AtomicInteger runCount = new AtomicInteger(1);
 
-        System.out.printf("Netcop collecting data on %d endpoints\n", this.endpoints.size());
         HistoryWriter historyWriter = new HistoryWriter(writeToFiles);
         System.out.printf("Progress ");
 

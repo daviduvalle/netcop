@@ -81,8 +81,13 @@ public final class Cop {
             }
         }
 
+        System.out.println("Netcop version: "+CopConfiguration.VERSION);
+
         EndpointReader endpointReader = new EndpointReader(line.getOptionValue(FILE_OPTION));
         List<String> endpoints = endpointReader.loadEndpoints();
+
+        System.out.println("Samples: " + samplesCount + ", wait: " +
+                waitSecondsInterval + " secs, endpoints: " + endpoints.size());
 
         CopRunner copRunner = new CopRunner(
                 endpoints,
