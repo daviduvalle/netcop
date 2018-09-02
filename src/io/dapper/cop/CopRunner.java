@@ -38,7 +38,7 @@ final class CopRunner {
      * @param waitSecondsInterval interval of seconds to wait before re-testing
      * @param samplesCount max number of tests to run
      */
-    public CopRunner(List<String> endpoints, boolean writeToFiles, int waitSecondsInterval, int samplesCount) {
+    CopRunner(List<String> endpoints, boolean writeToFiles, int waitSecondsInterval, int samplesCount) {
         this.endpoints = endpoints;
         this.writeToFiles = writeToFiles;
         this.waitSecondsInterval = waitSecondsInterval;
@@ -48,7 +48,7 @@ final class CopRunner {
     /**
      * Starts collecting samples
      */
-    public void run() {
+    void run() {
         // Main background thread that runs
         // at a fixed rate
         ScheduledExecutorService executor = 
