@@ -19,8 +19,8 @@ import io.dapper.cop.stats.CopStats;
  * Runs parallel HTTP pings and collects timing data per endpoint
  * The network requests run by a background thread on a configured
  * time interval for a certain number of cycles.
- * For example a 5 secs interval of 10 (max_run_count) cycles will
- * 10 times in total with a pause of 5 seconds every time.
+ * For example a 5 secs interval of 10 (samplesCount) cycles will run
+ * 10 times in total with a pause of 5 seconds between runs.
  */
 public final class CopRunner {
 
@@ -28,23 +28,26 @@ public final class CopRunner {
 
     private final List<String> endpoints;
     private final boolean writeToFiles;
-    private final int secondsInterval;
-    private final int maxRunCount;
+    private final int waitSecondsInterval;
+    private final int samplesCount;
 
     /**
      * Creates a cop runner instance
      * @param endpoints list of endpoints
      * @param writeToFiles determines if tests will be persisted or not
-     * @param secondsInterval interval of seconds to wait before re-testing
-     * @param maxRunCount max number of tests to run
+     * @param waitSecondsInterval interval of seconds to wait before re-testing
+     * @param samplesCount max number of tests to run
      */
-    public CopRunner(List<String> endpoints, boolean writeToFiles, int secondsInterval, int maxRunCount) {
+    public CopRunner(List<String> endpoints, boolean writeToFiles, int waitSecondsInterval, int samplesCount) {
         this.endpoints = endpoints;
         this.writeToFiles = writeToFiles;
-        this.secondsInterval = secondsInterval;
-        this.maxRunCount = maxRunCount;
+        this.waitSecondsInterval = waitSecondsInterval;
+        this.samplesCount = samplesCount;
     }
 
+    /**
+     * Starts collecting samples
+     */
     public void run() {
         // Main background thread that runs
         // at a fixed rate
@@ -78,7 +81,7 @@ public final class CopRunner {
             historyWriter.write();
 
             // Stop running after the max count is reached
-            if (runCount.intValue() == this.maxRunCount) {
+            if (runCount.intValue() == this.samplesCount) {
                 List<TestInstance> testInstances = this.getTestInstances(historyWriter);
                 CopStats copStats = new CopStats(testInstances, writeToFiles);
                 copStats.showStats();
@@ -90,7 +93,7 @@ public final class CopRunner {
 
         // Execute the task in an interval
         executor.scheduleAtFixedRate(task, 0,
-                this.secondsInterval, TimeUnit.SECONDS);
+                this.waitSecondsInterval, TimeUnit.SECONDS);
     }
 
     /**

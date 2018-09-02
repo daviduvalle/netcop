@@ -18,7 +18,7 @@ public final class StatsFileWriter {
 
     private Queue<EndpointStats> stats;
 
-    public StatsFileWriter(Queue<EndpointStats> stats) {
+    StatsFileWriter(Queue<EndpointStats> stats) {
         this.stats = stats;
     }
 
