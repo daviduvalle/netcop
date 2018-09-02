@@ -4,12 +4,7 @@ import static io.dapper.cop.configuration.CopConfiguration.*;
 
 import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.configuration.EndpointReader;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 
 import java.util.List;
 
@@ -23,6 +18,7 @@ public final class Cop {
     private static final String PERSIST_DATA = "persist";
     private static final String SAMPLES = "samples";
     private static final String WAIT_SECONDS = "seconds";
+    private static final String USAGE = "netcop --file yourfile.txt";
 
     /**
      * Gathers CLI args and runs the cop
@@ -32,35 +28,45 @@ public final class Cop {
     public static void main(String[] args) throws Exception {
         
         Options options = new Options();
-        options.addOption(FILE_OPTION, true, "file containing endpoints each in a new line");
-        options.addOption(PERSIST_DATA, true, "persists testing data and statistics in temporal" +
-                " files if enabled");
-        options.addOption(SAMPLES, true, "number of samples, default: "+ CopConfiguration
-                .DEFAULT_SAMPLES_COUNT);
-        options.addOption(WAIT_SECONDS, true, "number of seconds to wait between samples, " +
-                "default: " + CopConfiguration.DEFAULT_SECONDS_INTERVAL);
-        options.addOption(HELP_OPTION, "prints this help");
+
+        Option fileOption = Option.builder().hasArg(true).longOpt(FILE_OPTION).required(true)
+                .desc("file containing endpoints to be tested").argName("file.txt").build();
+        Option persistOption = Option.builder().hasArg(true).longOpt(PERSIST_DATA).required(false)
+                .desc("persist testing data and output in temporal files").argName
+                ("true|false").build();
+        Option samplesOption = Option.builder().hasArg(true).longOpt(SAMPLES).required(false)
+                .desc("number of samples to take, default: " + CopConfiguration
+                        .DEFAULT_SAMPLES_COUNT).argName("number").build();
+        Option waitOption = Option.builder().hasArg(true).longOpt(WAIT_SECONDS).required(false)
+                .desc("number of seconds to wait between samples, default: " + CopConfiguration
+                        .DEFAULT_SECONDS_INTERVAL).argName("seconds").build();
+        Option helpOption = Option.builder().hasArg(false).required(false).longOpt("help")
+                .desc("print this help").build();
+
+        options.addOption(fileOption);
+        options.addOption(persistOption);
+        options.addOption(samplesOption);
+        options.addOption(waitOption);
+        options.addOption(helpOption);
 
         CommandLineParser parser = new DefaultParser();
-        CommandLine line;
+        CommandLine line = null;
         boolean persistData = false;
         int waitSecondsInterval = CopConfiguration.DEFAULT_SECONDS_INTERVAL;
         int samplesCount = CopConfiguration.DEFAULT_SAMPLES_COUNT;
+        HelpFormatter formatter = new HelpFormatter();
 
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            throw e;
-        }
-
-        if (line.hasOption(HELP_OPTION)) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("netcop -file yourfile.txt -persist false", options);
+            System.err.println("Parsing failed: " + e.getMessage());
+            System.err.println("Example usage: "+USAGE);
             return;
         }
 
-        if (!line.hasOption(FILE_OPTION)) {
-            throw new IllegalArgumentException("Input file not specified as argument, terminating.");
+        if (line.hasOption(HELP_OPTION)) {
+            formatter.printHelp(USAGE, options);
+            return;
         }
 
         if (line.hasOption(PERSIST_DATA)) {
