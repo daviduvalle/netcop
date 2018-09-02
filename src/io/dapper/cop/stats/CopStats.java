@@ -2,9 +2,8 @@ package io.dapper.cop.stats;
 
 import java.util.*;
 
-import io.dapper.cop.models.EndpointStats;
 import io.dapper.cop.models.TestInstance;
-import io.dapper.cop.models.TestRecord;
+import io.dapper.cop.models.SampleRecord;
 
 /**
  * Computes basic statistics based on saved data
@@ -62,14 +61,15 @@ public final class CopStats {
                 HashMap<>();
 
         for (TestInstance testInstance : testInstances) {
-            for (TestRecord testRecord : testInstance.getTestRecords()) {
-                if (endpointToLatencyInstance.containsKey(testRecord.getWebsiteName())) {
-                    endpointToLatencyInstance.get(testRecord.getWebsiteName()).add(Double.valueOf(testRecord.getTime()));
+            for (SampleRecord sampleRecord : testInstance.getSampleRecords()) {
+                if (endpointToLatencyInstance.containsKey(sampleRecord.getEndpoint())) {
+                    endpointToLatencyInstance.get(sampleRecord.getEndpoint()).add(Double
+                            .valueOf(sampleRecord.getTime()));
                 } else {
                     Queue<Double> latencyInstances =
                             new PriorityQueue<>();
-                    latencyInstances.add(Double.valueOf(testRecord.getTime()));
-                    endpointToLatencyInstance.put(testRecord.getWebsiteName(), latencyInstances);
+                    latencyInstances.add(Double.valueOf(sampleRecord.getTime()));
+                    endpointToLatencyInstance.put(sampleRecord.getEndpoint(), latencyInstances);
                 }
             }
         }

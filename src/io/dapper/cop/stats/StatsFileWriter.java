@@ -1,7 +1,6 @@
 package io.dapper.cop.stats;
 
 import com.google.gson.Gson;
-import io.dapper.cop.models.EndpointStats;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +13,7 @@ import java.util.Queue;
 /**
  * Writes stats into a file in the OS temp files directory
  */
-public final class StatsFileWriter {
+final class StatsFileWriter {
 
     private Queue<EndpointStats> stats;
 

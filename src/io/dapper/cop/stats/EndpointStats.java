@@ -1,4 +1,4 @@
-package io.dapper.cop.models;
+package io.dapper.cop.stats;
 
 import java.text.DecimalFormat;
 
@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
  * Represents stats of an endpoint, exposes avg as is
  * used by a comparator to sort
  */
-public class EndpointStats {
+class EndpointStats {
     private static final DecimalFormat df = new DecimalFormat("#.##");
     private final String endpoint;
     private final int dataPoints;
@@ -14,7 +14,7 @@ public class EndpointStats {
     private final double median;
     private final double stdDeviation;
 
-    public EndpointStats(String endpoint, int dataPoints,
+    EndpointStats(String endpoint, int dataPoints,
                          double average,
                          double median,
                          double stdDeviation) {
@@ -29,7 +29,7 @@ public class EndpointStats {
         return Double.parseDouble(df.format(input));
     }
 
-    public double getAverage() {
+    double getAverage() {
         return this.average;
     }
 

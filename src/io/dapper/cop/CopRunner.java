@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.dapper.cop.history.HistoryReader;
 import io.dapper.cop.history.HistoryWriter;
 import io.dapper.cop.models.TestInstance;
-import io.dapper.cop.models.TestRecord;
+import io.dapper.cop.models.SampleRecord;
 import io.dapper.cop.net.HTTPPinger;
 import io.dapper.cop.stats.CopStats;
 
@@ -22,7 +22,7 @@ import io.dapper.cop.stats.CopStats;
  * For example a 5 secs interval of 10 (samplesCount) cycles will run
  * 10 times in total with a pause of 5 seconds between runs.
  */
-public final class CopRunner {
+final class CopRunner {
 
     private static final DecimalFormat df = new DecimalFormat("#.00");
 
@@ -63,17 +63,17 @@ public final class CopRunner {
 
         Runnable task = () -> {
             historyWriter.createTestInstance();
-            List<CompletableFuture<TestRecord>> timeFutures =
+            List<CompletableFuture<SampleRecord>> timeFutures =
                     endpoints.stream().map(testEndPoint ->
                             CompletableFuture.supplyAsync(
                                     () -> {
                                         HTTPPinger httpPinger = new HTTPPinger();
                                         double time = httpPinger.ping(testEndPoint);
-                                        TestRecord testRecord = new TestRecord(testEndPoint, df.format(time));
-                                        return testRecord;
+                                        SampleRecord sampleRecord = new SampleRecord(testEndPoint, df.format(time));
+                                        return sampleRecord;
                                     }, requestThreadPool)).collect(toList());
 
-            List<TestRecord> results =
+            List<SampleRecord> results =
                     timeFutures.stream().map(CompletableFuture::join).collect(toList());
 
             results.stream().forEach(r -> historyWriter.addRecord(r));

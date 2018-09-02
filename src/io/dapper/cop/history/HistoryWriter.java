@@ -1,21 +1,15 @@
 package io.dapper.cop.history;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
 
-import io.dapper.cop.configuration.CopConfiguration;
 import io.dapper.cop.models.TestInstance;
-import io.dapper.cop.models.TestRecord;
+import io.dapper.cop.models.SampleRecord;
 
 /**
  * Keeps network tests history in memory or in a file
@@ -40,10 +34,10 @@ public class HistoryWriter {
     /**
      * Add record to memory storage before writing
      * it down.
-     * @param testRecord a single test
+     * @param sampleRecord a single test
      */
-    public void addRecord(TestRecord testRecord) {
-        this.testInstance.addTestRecord(testRecord);
+    public void addRecord(SampleRecord sampleRecord) {
+        this.testInstance.addTestRecord(sampleRecord);
     }
 
     /**

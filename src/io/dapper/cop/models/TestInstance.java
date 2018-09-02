@@ -7,19 +7,19 @@ import java.util.List;
 public final class TestInstance {
 
     private String dateTime;
-    private List<TestRecord> testRecords;
+    private List<SampleRecord> sampleRecords;
 
     public TestInstance() {
         this.dateTime = LocalDateTime.now().toString();
-        this.testRecords = new ArrayList<TestRecord>();
+        this.sampleRecords = new ArrayList<SampleRecord>();
     }
 
-    public List<TestRecord> getTestRecords() {
-        return this.testRecords;
+    public List<SampleRecord> getSampleRecords() {
+        return this.sampleRecords;
     }
 
-    public void addTestRecord(TestRecord testRecord) {
-        this.testRecords.add(testRecord);
+    public void addTestRecord(SampleRecord sampleRecord) {
+        this.sampleRecords.add(sampleRecord);
     }
 
     public String getInstanceDate() {
@@ -27,6 +27,6 @@ public final class TestInstance {
     }
     
     public void clear() {
-        this.testRecords.clear();
+        this.sampleRecords.clear();
     }
 }
