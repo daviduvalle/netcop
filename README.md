@@ -4,7 +4,7 @@ Netcop is CLI tool that executes parallel HTTP pings to multiple endpoints. The 
 
 I can be used to troubleshoot network problems or to simply measure the speed of your endpoints.
 
-[Get it here](netcop.jar)
+[Get it here](https://github.com/daviduvalle/netcop/blob/master/out/netcop.jar)
 
 Run it:
 ```sh
