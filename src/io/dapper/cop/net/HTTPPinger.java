@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.common.base.Stopwatch;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 /**
  * Simple http client that connects to a http server
@@ -21,14 +22,16 @@ public final class HTTPPinger {
 
     // Same timeout used for connect and connection request
     // change them if needed.
-    private final static int TIMEOUT = 4000;
+    private final static int CONNECT_TIMEOUT = 500;
+    private final static int REQUEST_TIMEOUT = 10000;
     private final static RequestConfig requestConfig;
     private static RequestConfig.Builder requestBuilder = RequestConfig
             .custom();
+
     static {
         requestBuilder =
-                requestBuilder.setConnectTimeout(TIMEOUT)
-                        .setConnectionRequestTimeout(TIMEOUT)
+                requestBuilder.setConnectTimeout(CONNECT_TIMEOUT)
+                        .setConnectionRequestTimeout(REQUEST_TIMEOUT)
                         .setCookieSpec(CookieSpecs.STANDARD).setRedirectsEnabled(false);
         requestConfig = requestBuilder.build();
     }
@@ -38,8 +41,8 @@ public final class HTTPPinger {
      * @return ping time
      */
     public long ping(String endpoint) {
-        HttpClient client = HttpClientBuilder.create().
-                setDefaultRequestConfig(requestConfig).build();
+        // Each request/thread has its own client and connection pool
+        HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
         HttpGet request = new HttpGet(endpoint);
         Stopwatch stopWatch = Stopwatch.createStarted();
 
@@ -50,6 +53,7 @@ public final class HTTPPinger {
                 stopWatch.stop();
             }
         } catch (IOException e) {
+            System.err.println("Couldn't connect to "+endpoint);
             e.printStackTrace();
             stopWatch.stop();
         }

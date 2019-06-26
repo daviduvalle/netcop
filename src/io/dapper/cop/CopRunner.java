@@ -129,7 +129,7 @@ final class CopRunner {
             public Thread newThread(Runnable r) {
                 Thread t  = new Thread(r);
                 t.setDaemon(true);
-                t.setName("request-"+t.getId());
+                t.setName("cop-request-"+t.getId());
                 return t;
             }
         });
